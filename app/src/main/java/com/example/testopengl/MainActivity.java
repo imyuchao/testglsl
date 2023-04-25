@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.opengl.GLSurfaceView;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +31,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        GLSurfaceView surfaceView = new GLSurfaceView(this);
+        MyRenderer renderer = new MyRenderer();
+        surfaceView.setEGLContextClientVersion(3);
+        surfaceView.setRenderer(renderer);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 

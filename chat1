@@ -1,0 +1,69 @@
+要实现图片的径向模糊效果，您可以遵循以下步骤：
+
+加载图片
+首先，您需要从文件或网络中加载您想要模糊的图片。您可以使用Android的Bitmap类来加载和处理图像。
+
+创建OpenGL ES上下文
+接下来，您需要在Android应用程序中创建OpenGL ES上下文，以便能够使用OpenGL ES API进行图像处理。您可以使用GLSurfaceView或TextureView来创建OpenGL ES上下文。
+
+创建着色器程序
+着色器程序是OpenGL ES中用于实现图像处理的核心部分。您需要编写着色器程序来实现径向模糊效果。具体来说，您需要编写顶点着色器和片段着色器。顶点着色器用于将顶点数据传递到片段着色器，片段着色器用于计算每个像素的模糊程度。
+
+创建帧缓冲对象
+要实现模糊效果，您需要将图像渲染到一个帧缓冲对象中。帧缓冲对象是一个特殊的OpenGL对象，用于在内存中存储渲染结果。
+
+实现径向模糊
+一旦您完成了前面的步骤，就可以开始实现径向模糊效果了。具体来说，您需要将原始图像绘制到帧缓冲对象中，然后通过多次渲染和模糊处理来实现模糊效果。您可以使用高斯模糊算法来实现模糊处理。
+
+将模糊图像渲染到屏幕上
+一旦您完成了模糊处理，您需要将模糊图像从帧缓冲对象中提取出来，并将其渲染到屏幕上。您可以使用纹理来渲染模糊图像。具体来说，您需要在片段着色器中使用模糊纹理来计算每个像素的颜色值。
+
+
+Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.image);
+
+GLSurfaceView glSurfaceView = new GLSurfaceView(this);
+glSurfaceView.setEGLContextClientVersion(3);
+glSurfaceView.setRenderer(new MyRenderer());
+setContentView(glSurfaceView);
+
+private static final String VERTEX_SHADER =
+        "attribute vec4 a_Position;\n" +
+        "attribute vec2 a_TexCoord;\n" +
+        "varying vec2 v_TexCoord;\n" +
+        "void main() {\n" +
+        "  gl_Position = a_Position;\n" +
+        "  v_TexCoord = a_TexCoord;\n" +
+        "}\n";
+
+private static final String FRAGMENT_SHADER =
+        "precision mediump float;\n" +
+        "uniform sampler2D u_Texture;\n" +
+        "varying vec2 v_TexCoord;\n" +
+        "void main() {\n" +
+        "  gl_FragColor = texture2D(u_Texture, v_TexCoord);\n" +
+        "}\n";
+
+int program = GLES31.glCreateProgram();
+int vertexShader = GLES31.glCreateShader(GLES31.GL_VERTEX_SHADER);
+GLES31.glShaderSource(vertexShader, VERTEX_SHADER);
+GLES31.glCompileShader(vertexShader);
+int fragmentShader = GLES31.glCreateShader(GLES31.GL_FRAGMENT_SHADER);
+GLES31.glShaderSource(fragmentShader, FRAGMENT_SHADER);
+GLES31.glCompileShader(fragmentShader);
+GLES31.glAttachShader(program, vertexShader);
+GLES31.glAttachShader(program, fragmentShader);
+GLES31.glLinkProgram(program);
+GLES31.glUseProgram(program);
+
+
+int[] framebuffer = new int[1];
+GLES31.glGenFramebuffers(1, framebuffer, 0);
+GLES31.glBindFramebuffer(GLES31.GL_FRAMEBUFFER, framebuffer[0]);
+
+int[] texture = new int[1];
+GLES31.glGenTextures(1, texture, 0);
+GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, texture[0]);
+GLES31.glTexImage2D(GLES31.GL_TEXTURE_2D, 0, GLES31.GL_RGBA, width, height, 0, GLES31.GL_RGBA, GLES31.GL_UNSIGNED_BYTE, null);
+GLES31.glTexParameteri(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_MIN_FILTER, GLES31.GL_LINEAR);
+GLES31.glTexParameteri(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_MAG_FILTER, GLES31.GL_LINEAR);
+GLES31.glFramebufferTexture2D(GLES31.GL_FRAMEBUFFER, GLES31.GL_COLOR_ATTACHMENT0, GLES31.GL
